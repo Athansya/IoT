@@ -101,13 +101,18 @@ def publish(
         topic (str): Tópico al que se mandará el mensaje (remitente). 
         msg (str): Contenido del mensaje. 
         qos (int, optional): Quality of Service. Defaults to 1.
-        #TODO CHECAR QUE QOS SEA VALIDO
+        #TODO CHECAR QUE QoS SEA VALIDO
         repetitions (int, optional): número de veces que se mandará el mensaje.
         Defaults to 1.
 
     Raises:
+        ValueError: Valor erróneo para QoS.
         FailedMessageException: Error en el envío del mensaje.
     """
+    # QoS
+    if qos not in [0, 1, 2]:
+        raise ValueError(f"Invalid value for QoS: {qos}")
+
     for _ in range(repetitions):
         time.sleep(1)
         try:
@@ -137,9 +142,9 @@ def subscribe(
         """Callback cada vez que reciba un mensaje.
 
         Args:
-            client (_type_): Objeto cliente.
+            client (mqtt_client.Client): Objeto cliente.
             userdata (_type_): Datos definidos del usuario.
-            msg (_type_): Mensaje recibido en formato binario.
+            msg (str): Mensaje recibido en formato binario.
         """
         print(f"Recieved '{msg.payload.decode()}' from '{msg.topic}' topic")
         message_list.append(msg.payload.decode())  # Guarda el mensaje

@@ -1,2 +1,4 @@
 # Directorios
 *-env/
+__pycache__/
+.vscode/

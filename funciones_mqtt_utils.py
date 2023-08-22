@@ -50,7 +50,11 @@ class FailedMessageException(Exception):
 # ---------------------------------------------------------------------------- #
 
 
-def connect_mqtt() -> mqtt_client.Client:
+def connect_mqtt(
+    client_id: str=CLIENT_ID,
+    broker: str=BROKER,
+    port: str=PORT
+    ) -> mqtt_client.Client:
     """Inicializa un cliente y lo conecta a la red
 
     Returns:
@@ -74,21 +78,22 @@ def connect_mqtt() -> mqtt_client.Client:
             FailedConnectionException: Error en la conexión.
         """
         if rc == 0:
-            print("Connected to MQTT Broker!")
+            print(f"Connected {client_id} to MQTT Broker!")
         else:
             raise FailedConnectionException(
-                f"Failed to connect with error code: {rc}\n"
+                f"Failed to connect {client_id} with error code: {rc}\n"
             )
 
-    client = mqtt_client.Client(CLIENT_ID)
-    print(f"client: {client}")
+    client = mqtt_client.Client(client_id)
+    # print(f"client: {client_id}")
     client.on_connect = on_connect
-    client.connect(BROKER, PORT)
+    client.connect(broker, port)
     return client
 
 
 def publish(
     client: mqtt_client.Client, 
+    client_id: str,
     topic: str, 
     msg: str,
     qos: int = 1,
@@ -101,7 +106,6 @@ def publish(
         topic (str): Tópico al que se mandará el mensaje (remitente). 
         msg (str): Contenido del mensaje. 
         qos (int, optional): Quality of Service. Defaults to 1.
-        #TODO CHECAR QUE QoS SEA VALIDO
         repetitions (int, optional): número de veces que se mandará el mensaje.
         Defaults to 1.
 
@@ -121,13 +125,14 @@ def publish(
             if status != 0:
                 raise FailedMessageException("Message failed to send")
             else:
-                print(f"Sent '{msg}' to topic '{topic}'")
+                print(f"'{client_id}' sent '{msg}' to topic '{topic}'")
         except FailedMessageException as e:
             print(f"{e} with status: {status}")
 
 
 def subscribe(
     client: mqtt_client.Client,
+    client_id: str,
     topic: str,
     message_list: list[str]
 ):
@@ -146,7 +151,7 @@ def subscribe(
             userdata (_type_): Datos definidos del usuario.
             msg (str): Mensaje recibido en formato binario.
         """
-        print(f"Recieved '{msg.payload.decode()}' from '{msg.topic}' topic")
+        print(f"'{client_id}' recieved '{msg.payload.decode()}' from '{msg.topic}' topic")
         message_list.append(msg.payload.decode())  # Guarda el mensaje
         #TODO INTENTAR UTILIZAR UNA COLA EN LUGAR DE UNA LISTA
 
